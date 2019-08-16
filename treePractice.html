@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="./ext-3.3.0/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+    <script src="./ext-3.3.0/adapter/ext/ext-base.js" type="text/javascript"></script>
+    <script src="./ext-3.3.0/ext-all.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        Ext.onReady(function () {
+            var menu=new Ext.menu.Menu({
+                items:[{
+                    id:'addclass',
+                    text:'Add Class'
+                },{
+                    id:'addstudent',
+                    text:'Add Student'
+                }],
+                listeners:{
+                    itemclick:function(item){
+                        switch(item.id){
+                            case 'addclass':
+                             Ext.MessageBox.show({
+                                 title:'AddClass',
+                                 msg:'please input',
+                                 width:300,
+                                 buttons:Ext.MessageBox.OKCANCEL,
+                                 multiline:true,
+                                 fn:(btn,text)=>{
+                                     var name=text;
+                                     var addnewNode=createItem(name);
+                                     root.appendChild(addnewNode);
+                                 }
+                             })
+                             break;
+                             case 'addstudent':
+                            var  addNode = item.parentMenu.contextNode;
+                             Ext.MessageBox.show({
+                                 title:'AddStudent',
+                                 msg:'please input',
+                                 width:300,
+                                 buttons:Ext.MessageBox.OKCANCEL,
+                                 multiline:true,
+                                 fn:(btn,text)=>{
+                                     var name=text;
+                                     var addnewNode=createItem(name);
+                                     addNode.appendChild(addnewNode);
+                                 }
+                             })
+                             break;
+                        }
+                    }
+                }
+            })
+            var tree = new Ext.tree.TreePanel({
+                el:'test',
+                id:'treepanel',
+                width: 400,
+                height: 400,
+                useArrows:true,
+                contextMenu:menu,
+               // load:new Ext.tree.TreeLoader({dataUrl:'class_student.txt'}),                
+                 listeners:{
+                  click:function(node){                  
+                      console.log(node);
+                     this.selectedNode=node;
+                  },
+                  contextmenu:function(node,e){
+                      node.select();
+                      var treeContextMenu=node.getOwnerTree().contextMenu;
+                      treeContextMenu.contextNode = node;
+                      treeContextMenu.showAt(e.getXY());
+                  }
+                 }
+            }) 
+            var createItem=(name)=>{
+                return{
+                    text:name,
+                    leaf:true
+                }
+            }
+            // var root=new Ext.tree.AsyncTreeNode({
+            //     text:'School'
+            // }) 
+            var schoolNode=tree.root;
+            var root= new Ext.tree.TreeNode({
+                text: '🏙School',
+                expanded: true
+            
+            }) 
+            var class1=new Ext.tree.TreeNode({
+                id:'classone',
+                text:'Classes',
+                expanded: true
+            })
+            var students=new Ext.tree.TreeNode({
+                id:'students',
+                text:'👩Student',
+                expanded: true
+            })
+            var student1=new Ext.tree.TreeNode({
+                id:'student1',
+                expanded: true,
+                text:'小明'
+            })
+            tree.setRootNode(root);
+            root.appendChild(class1);  
+            class1.appendChild(students);   
+            students.appendChild(student1);
+            var treeEditor=new Ext.tree.TreeEditor(tree,{allowBlank:false},{
+                listeners:{
+                    complete:function(editor,currVal,origVal){
+                        Ext.Msg.alert('Tree Editor','node change from'+origVal+'to'+currVal);
+                    }
+                }
+            })
+            
+            tree.render();
+            let selectedNode=null;
+            var schoolform=new Ext.FormPanel({
+                renderTo:'form1',
+                frame:true,
+                title:'Add',
+                width:400,
+                items:[{
+                    xtype:'radiogroup',
+                    items:[{
+                        xtype:'radio',
+                        boxLabel:'学生',
+                        inputValue:'students',
+                        name:'rootId',
+                        allowBlank:false
+                    },{
+                        xtype:'radio',
+                        boxLabel:'班级',
+                        inputValue:'classone',
+                        name:'rootId',
+                        allowBlank:false
+                    }],
+                    listeners:{
+                        change:function(group,item){
+                          selectedRoot=Ext.getCmp('treepanel').getNodeById(item.inputValue)
+                        }
+                    }
+                },{
+                    xtype:'textfield',
+                    fieldLabei:'ItemName',
+                    name:'item',
+                }],
+                buttons:[{
+                    text:'Add',
+                    handler:function(){
+                       if(selectedRoot!==null){
+                           selectedRoot.appendChild(createItem(schoolform.form.findField('item').getValue()));
+                           schoolform.form.findField('item').setValue('');
+                           return
+                       }
+    
+                    }
+                }]
+            })
+
+        })
+          
+    </script>
+</head>
+
+<body>
+    <div id='test'></div>
+    <div id='form1'></div>
+</body>
+
+</html>
